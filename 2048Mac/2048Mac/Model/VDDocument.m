@@ -41,11 +41,41 @@
 {
     [super windowControllerDidLoadNib:aController];
     [self.boardView becomeFirstResponder];
+    [self updateScoreTextFields];
 }
 
 + (BOOL)autosavesInPlace
 {
     return YES;
+}
+
+#pragma mark -
+
+ // Overridden to save the document's managed objects referenced by the managed object context. If this is the first time the document is being saved, simply pass nil as the originalContentsURL.
+- (BOOL)writeToURL:(NSURL *)absoluteURL ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation originalContentsURL:(NSURL *)absoluteOriginalContentsURL error:(NSError **)error
+{
+    NSLog(@"%@", absoluteURL);
+    return [super writeToURL:absoluteURL ofType:typeName forSaveOperation:saveOperation originalContentsURL:absoluteOriginalContentsURL error:error];
+}
+
+ // Overridden to load the document's managed objects through the managed object context.
+- (BOOL)readFromURL:(NSURL *)absoluteURL ofType:(NSString *)typeName error:(NSError **)error
+{
+    NSLog(@"%@", absoluteURL);
+    return [super readFromURL:absoluteURL ofType:typeName error:error];
+}
+
+#pragma mark -
+
+- (void)updateScoreTextFields
+{
+    NSUInteger gameScore = self.game.score;
+    [self.scoreTextField setStringValue:[NSString stringWithFormat:@"%lu", gameScore]];
+    
+    if (gameScore > [self bestScore])
+        [self setBestScore:gameScore];
+    
+    [self.topScoreTextField setStringValue:[NSString stringWithFormat:@"%lu", [self bestScore]]];
 }
 
 #pragma mark - VDBoardViewDataSource
@@ -73,13 +103,7 @@
     if (result)
     {
         BOOL isGameOver = ![self.game moveToDirection:direction movedCells:movedCells mergedCells:mergedCells newValue:newValuePath];
-        NSUInteger gameScore = self.game.score;
-        [self.scoreTextField setStringValue:[NSString stringWithFormat:@"%lu", gameScore]];
-        
-        if (gameScore > [self bestScore])
-            [self setBestScore:gameScore];
-        
-        [self.topScoreTextField setStringValue:[NSString stringWithFormat:@"%lu", [self bestScore]]];
+        [self updateScoreTextFields];
         
         if (isGameOver)
         {

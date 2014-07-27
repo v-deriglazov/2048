@@ -41,7 +41,7 @@
 
 - (NSUInteger)score
 {
-    return self.data.currentScrore;//[self.data.score integerValue];
+    return [self.data.score integerValue];
 }
 
 #pragma mark - Move
@@ -188,7 +188,7 @@
             break;
     }
     
-    NSLog(@"after move. %@", self.data.rawData);
+    NSLog(@"after move. %@", self.data.boardData);
     
     if (movedCells != NULL)
     {
@@ -210,7 +210,7 @@
     NSMutableDictionary *result = [NSMutableDictionary new];
     NSMutableDictionary *mergedDictionary = [NSMutableDictionary new];
     
-    NSLog(@"moveAllValuesToLeft. %@", self.data.rawData);
+    NSLog(@"moveAllValuesToLeft. %@", self.data.boardData);
     for (NSUInteger row = 0; row < [self numberOfRows]; row++)
     {
         NSMutableSet *mergedCols = [NSMutableSet new];
@@ -272,7 +272,7 @@
     NSMutableDictionary *result = [NSMutableDictionary new];
     NSMutableDictionary *mergedDictionary = [NSMutableDictionary new];
     
-    NSLog(@"moveAllValuesToRight. %@", self.data.rawData);
+    NSLog(@"moveAllValuesToRight. %@", self.data.boardData);
     for (NSUInteger row = 0; row < [self numberOfRows]; row++)
     {
         NSMutableSet *mergedCols = [NSMutableSet new];
@@ -336,7 +336,7 @@
     NSMutableDictionary *result = [NSMutableDictionary new];
     NSMutableDictionary *mergedDictionary = [NSMutableDictionary new];
     
-    NSLog(@"moveAllValuesToDown. %@", self.data.rawData);
+    NSLog(@"moveAllValuesToDown. %@", self.data.boardData);
     for (NSInteger col = 0; col < [self numberOfColumns]; col++)
     {
         NSMutableSet *mergedRows = [NSMutableSet new];
@@ -400,7 +400,7 @@
     NSMutableDictionary *result = [NSMutableDictionary new];
     NSMutableDictionary *mergedDictionary = [NSMutableDictionary new];
     
-    NSLog(@"moveAllValuesToUp. %@", self.data.rawData);
+    NSLog(@"moveAllValuesToUp. %@", self.data.boardData);
     
     for (NSInteger col = 0; col < [self numberOfColumns]; col++)
     {

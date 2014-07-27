@@ -11,6 +11,8 @@
 
 #import "VDGameData.h"
 
+static float const kVDBoardViewMoveAnitionDuration = 0.3;//1.0f;
+
 @interface VDBoardView () <NSAnimationDelegate>
 
 @end
@@ -137,7 +139,6 @@
     if (makeMove)
     {
         __block NSMutableArray *movingAnimationDictionaries = [NSMutableArray new];
-        __block NSMutableArray *mergedAnimationDictionaries = [NSMutableArray new];
         [movedCells enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop)
         {
             NSUInteger rowFrom = 0;
@@ -161,7 +162,7 @@
             [movingAnimationDictionaries addObject:dict];
         }];
         
-        NSViewAnimation *animation = [[NSViewAnimation alloc] initWithDuration:1 animationCurve:NSAnimationEaseIn];
+        NSViewAnimation *animation = [[NSViewAnimation alloc] initWithDuration:kVDBoardViewMoveAnitionDuration animationCurve:NSAnimationEaseIn];
         animation.delegate = self;
         [animation setViewAnimations:movingAnimationDictionaries];
         

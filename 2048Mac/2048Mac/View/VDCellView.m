@@ -8,6 +8,9 @@
 
 #import "VDCellView.h"
 
+static CGFloat const kVDCellViewChangeValueAnimationDuration = 0.3;
+static CGFloat const kVDCellViewAnimationTimeOffset = 0.3;//1;
+
 @interface VDCellView () <NSAnimationDelegate>
 @property (nonatomic, strong) NSTextField *valueField;
 @end
@@ -56,10 +59,6 @@
         _valueField.selectable = NO;
         
         [_valueField setWantsLayer:YES];
-//        _valueField.layer.borderColor = [[NSColor blackColor] CGColor];
-//        _valueField.layer.borderWidth = 1;
-        
-//        _valueField.layer.delegate = self;
         
         _valueField.autoresizingMask = NSViewHeightSizable | NSViewWidthSizable;
         [self addSubview:_valueField];
@@ -109,14 +108,13 @@
         fadeOutAnim.duration = 1;
         [layer addAnimation:fadeOutAnim forKey:@"fadeOutAnim"];
         
-        double delayInSeconds = 1.0;
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kVDCellViewAnimationTimeOffset * NSEC_PER_SEC));
         dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
                        {
                            CABasicAnimation* fadeInAnim = [CABasicAnimation animationWithKeyPath:@"opacity"];
                            fadeInAnim.fromValue = [NSNumber numberWithFloat:0.0];
                            fadeInAnim.toValue = [NSNumber numberWithFloat:1.0];
-                           fadeInAnim.duration = 1;
+                           fadeInAnim.duration = kVDCellViewChangeValueAnimationDuration;
                            
                            self.value = aValue;
                            layer.opacity = 1;
@@ -134,22 +132,5 @@
     _animationMode = animationMode;
     [self refreshColor];
 }
-
-//- (void)drawRect:(NSRect)dirtyRect
-//{
-//	[super drawRect:dirtyRect];
-//	
-//    if (!self.animationMode)
-//    {
-////        NSColor *cellColor = [[self class] cellColorForValue:self.value];
-//        NSRect bounds = self.bounds;
-//        
-////        [cellColor setFill];
-////        NSRectFill(bounds);
-//
-//        [[NSColor blackColor] set];
-//        NSFrameRectWithWidth(bounds, 1);
-//    }
-//}
 
 @end

@@ -59,14 +59,14 @@
 		E795B97B19676E3300723004 /* 2048MacTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "2048MacTests-Info.plist"; sourceTree = "<group>"; };
 		E795B97D19676E3300723004 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E795B97F19676E3300723004 /* _048MacTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = _048MacTests.m; sourceTree = "<group>"; };
-		E795B98A19676E9C00723004 /* VDGameCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VDGameCore.h; path = Model/VDGameCore.h; sourceTree = "<group>"; };
-		E795B98B19676E9C00723004 /* VDGameCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VDGameCore.m; path = Model/VDGameCore.m; sourceTree = "<group>"; };
-		E795B9901967722900723004 /* VDGameData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VDGameData.h; path = Model/VDGameData.h; sourceTree = "<group>"; };
-		E795B9911967722900723004 /* VDGameData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VDGameData.m; path = Model/VDGameData.m; sourceTree = "<group>"; };
-		E7ADB8BD1969E74A003A9372 /* VDBoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VDBoardView.h; path = View/VDBoardView.h; sourceTree = "<group>"; };
-		E7ADB8BE1969E74A003A9372 /* VDBoardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VDBoardView.m; path = View/VDBoardView.m; sourceTree = "<group>"; };
-		E7DC5155197B0DE300DB05BE /* VDCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VDCellView.h; path = View/VDCellView.h; sourceTree = "<group>"; };
-		E7DC5156197B0DE300DB05BE /* VDCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VDCellView.m; path = View/VDCellView.m; sourceTree = "<group>"; };
+		E795B98A19676E9C00723004 /* VDGameCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VDGameCore.h; sourceTree = "<group>"; };
+		E795B98B19676E9C00723004 /* VDGameCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VDGameCore.m; sourceTree = "<group>"; };
+		E795B9901967722900723004 /* VDGameData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VDGameData.h; sourceTree = "<group>"; };
+		E795B9911967722900723004 /* VDGameData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VDGameData.m; sourceTree = "<group>"; };
+		E7ADB8BD1969E74A003A9372 /* VDBoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VDBoardView.h; sourceTree = "<group>"; };
+		E7ADB8BE1969E74A003A9372 /* VDBoardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VDBoardView.m; sourceTree = "<group>"; };
+		E7DC5155197B0DE300DB05BE /* VDCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VDCellView.h; sourceTree = "<group>"; };
+		E7DC5156197B0DE300DB05BE /* VDCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VDCellView.m; sourceTree = "<group>"; };
 		E7F96E51197C4E0100E74AAB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -135,28 +135,12 @@
 		E795B95519676E3200723004 /* 2048Mac */ = {
 			isa = PBXGroup;
 			children = (
+				E7F704E519851ACE00E42A67 /* Resources */,
+				E7F704E41984FB4500E42A67 /* Config */,
 				E7ADB8BC1969E706003A9372 /* View */,
 				E795B98919676E5F00723004 /* Model */,
-				E795B96119676E3200723004 /* VDDocument.h */,
-				E795B96219676E3200723004 /* VDDocument.m */,
-				E795B96419676E3200723004 /* VDDocument.xib */,
-				E795B96719676E3200723004 /* MainMenu.xib */,
-				E795B96D19676E3200723004 /* Images.xcassets */,
-				E795B95619676E3200723004 /* Supporting Files */,
 			);
 			path = 2048Mac;
-			sourceTree = "<group>";
-		};
-		E795B95619676E3200723004 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				E795B95719676E3200723004 /* 2048Mac-Info.plist */,
-				E795B95819676E3200723004 /* InfoPlist.strings */,
-				E795B95B19676E3200723004 /* main.m */,
-				E795B95D19676E3200723004 /* 2048Mac-Prefix.pch */,
-				E795B95E19676E3200723004 /* Credits.rtf */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		E795B97919676E3300723004 /* 2048MacTests */ = {
@@ -180,13 +164,15 @@
 		E795B98919676E5F00723004 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				E795B96A19676E3200723004 /* VDDocument.xcdatamodeld */,
+				E795B96119676E3200723004 /* VDDocument.h */,
+				E795B96219676E3200723004 /* VDDocument.m */,
 				E795B98A19676E9C00723004 /* VDGameCore.h */,
 				E795B98B19676E9C00723004 /* VDGameCore.m */,
-				E795B96A19676E3200723004 /* VDDocument.xcdatamodeld */,
 				E795B9901967722900723004 /* VDGameData.h */,
 				E795B9911967722900723004 /* VDGameData.m */,
 			);
-			name = Model;
+			path = Model;
 			sourceTree = "<group>";
 		};
 		E7ADB8BC1969E706003A9372 /* View */ = {
@@ -197,7 +183,29 @@
 				E7DC5155197B0DE300DB05BE /* VDCellView.h */,
 				E7DC5156197B0DE300DB05BE /* VDCellView.m */,
 			);
-			name = View;
+			path = View;
+			sourceTree = "<group>";
+		};
+		E7F704E41984FB4500E42A67 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				E795B95719676E3200723004 /* 2048Mac-Info.plist */,
+				E795B95B19676E3200723004 /* main.m */,
+				E795B95D19676E3200723004 /* 2048Mac-Prefix.pch */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		E7F704E519851ACE00E42A67 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E795B95819676E3200723004 /* InfoPlist.strings */,
+				E795B95E19676E3200723004 /* Credits.rtf */,
+				E795B96419676E3200723004 /* VDDocument.xib */,
+				E795B96719676E3200723004 /* MainMenu.xib */,
+				E795B96D19676E3200723004 /* Images.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -446,8 +454,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "2048Mac/2048Mac-Prefix.pch";
-				INFOPLIST_FILE = "2048Mac/2048Mac-Info.plist";
+				GCC_PREFIX_HEADER = "2048Mac/Config/2048Mac-Prefix.pch";
+				INFOPLIST_FILE = "2048Mac/Config/2048Mac-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -459,8 +467,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "2048Mac/2048Mac-Prefix.pch";
-				INFOPLIST_FILE = "2048Mac/2048Mac-Info.plist";
+				GCC_PREFIX_HEADER = "2048Mac/Config/2048Mac-Prefix.pch";
+				INFOPLIST_FILE = "2048Mac/Config/2048Mac-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

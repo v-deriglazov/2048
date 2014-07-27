@@ -14,19 +14,21 @@ NSUInteger const VDBoardSize = 4;
 @interface VDGameData ()
 
 @property (nonatomic, strong) NSMutableArray *freeCells;
+@property (nonatomic, strong) NSMutableArray *rawData;
 
 @end
 
 
 @implementation VDGameData
 
-@dynamic data;
+@dynamic boardData;
 @dynamic score;
+@dynamic time;
 
 @synthesize rawData;
 @synthesize freeCells;
 
-@synthesize currentScrore;
+#pragma mark - Public
 
 - (NSUInteger)valueAtBoardCellRow:(NSUInteger)row column:(NSUInteger)column
 {
@@ -46,6 +48,7 @@ NSUInteger const VDBoardSize = 4;
     {
         [self.freeCells removeObject:rowCol];
     }
+    [self syncData];
 }
 
 - (NSString *)addRandomValue
@@ -58,11 +61,12 @@ NSUInteger const VDBoardSize = 4;
     
     NSUInteger addValue = 2;
     [self setValue:addValue atBoardCellRow:row column:col];
-//    self.score = [NSNumber numberWithInteger:self.score.integerValue + addValue];
-    self.currentScrore += addValue;
+    self.score = [NSNumber numberWithInteger:self.score.integerValue + addValue];
     
     return cellIndex;
 }
+
+#pragma mark - Core Data
 
 - (void)awakeFromInsert
 {
@@ -85,6 +89,26 @@ NSUInteger const VDBoardSize = 4;
     {
         [self addRandomValue];
     }
+    [self syncData];
+}
+
+- (void)awakeFromFetch
+{
+    NSLog(@"awakeFromFetch %@", self.boardData);
+}
+
+- (void)syncData
+{
+    NSMutableString *boardData = [NSMutableString new];
+    for (int i = 0; i < VDBoardSize; i++)
+    {
+        for (int j = 0; j < VDBoardSize; j++)
+        {
+            NSInteger value = [self valueAtBoardCellRow:i column:j];
+            [boardData appendFormat:@"%lu;", value];
+        }
+    }
+    self.boardData = boardData;
 }
 
 #pragma mark - Utils

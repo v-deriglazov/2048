@@ -13,12 +13,9 @@ extern NSUInteger const VDBoardSize;
 
 @interface VDGameData : NSManagedObject
 
-@property (nonatomic, retain) NSString * data;
-@property (nonatomic, retain) NSNumber * score;
-
-
-@property (nonatomic, strong) NSMutableArray *rawData;
-@property (nonatomic) NSUInteger currentScrore; //temporary property
+@property (nonatomic, retain) NSString *boardData;
+@property (nonatomic, retain) NSNumber *score;
+@property (nonatomic, retain) NSNumber *time;
 
 
 - (NSUInteger)valueAtBoardCellRow:(NSUInteger)row column:(NSUInteger)column;
