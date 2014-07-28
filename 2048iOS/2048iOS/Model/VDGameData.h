@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+#import "VDPosition.h"
+
 extern NSUInteger const VDBoardSize;
 
 @interface VDGameData : NSManagedObject
@@ -18,12 +20,8 @@ extern NSUInteger const VDBoardSize;
 @property (nonatomic, retain) NSNumber *time;
 
 
-- (NSUInteger)valueAtBoardCellRow:(NSUInteger)row column:(NSUInteger)column;
-- (void)setValue:(NSUInteger)value atBoardCellRow:(NSUInteger)row column:(NSUInteger)column;
-- (NSString *)addRandomValue;
-
-
-+ (NSString *)encodeRow:(NSUInteger)row column:(NSUInteger)column;
-+ (void)decodeString:(NSString *)str row:(NSUInteger *)row column:(NSUInteger *)column;
+- (NSUInteger)valueAtPosition:(VDPosition)position;
+- (void)setValue:(NSUInteger)value atPosition:(VDPosition)position;
+- (VDPosition)addRandomValue;
 
 @end

@@ -30,16 +30,22 @@ NSUInteger const VDBoardSize = 4;
 
 #pragma mark - Public
 
-- (NSUInteger)valueAtBoardCellRow:(NSUInteger)row column:(NSUInteger)column
+- (NSUInteger)valueAtPosition:(VDPosition)position
 {
-    NSNumber *number = self.rawData[row][column];
+    if (position.row >= VDBoardSize || position.column >= VDBoardSize)
+        return 0;
+    
+    NSNumber *number = self.rawData[position.row][position.column];
     return [number unsignedIntegerValue];
 }
 
-- (void)setValue:(NSUInteger)value atBoardCellRow:(NSUInteger)row column:(NSUInteger)column
+- (void)setValue:(NSUInteger)value atPosition:(VDPosition)position
 {
-    self.rawData[row][column] = @(value);
-    NSString *rowCol = [[self class] encodeRow:row column:column];
+    if (position.row >= VDBoardSize || position.column >= VDBoardSize)
+        return;
+
+    self.rawData[position.row][position.column] = @(value);
+    NSString *rowCol = VDPositionToString(position);
     if (value == 0)
     {
         [self.freeCells addObject:rowCol];
@@ -51,19 +57,16 @@ NSUInteger const VDBoardSize = 4;
     [self syncData];
 }
 
-- (NSString *)addRandomValue
+- (VDPosition)addRandomValue
 {
-    NSString *cellIndex = [[self class] randomCellFromArray:self.freeCells];
-    NSLog(@"addRandomValue at %@", cellIndex);
-    NSUInteger row = 0;
-    NSUInteger col = 0;
-    [[self class] decodeString:cellIndex row:&row column:&col];
+    VDPosition position = [[self class] randomCellFromArray:self.freeCells];
+    NSLog(@"addRandomValue at %@", VDPositionToString(position));
     
     NSUInteger addValue = 2;
-    [self setValue:addValue atBoardCellRow:row column:col];
+    [self setValue:addValue atPosition:position];
     self.score = [NSNumber numberWithInteger:self.score.integerValue + addValue];
     
-    return cellIndex;
+    return position;
 }
 
 #pragma mark - Core Data
@@ -79,7 +82,7 @@ NSUInteger const VDBoardSize = 4;
         for (int j = 0; j < VDBoardSize; j++)
         {
             [rowData addObject:@(0)];
-            [self.freeCells addObject:[[self class] encodeRow:i column:j]];
+            [self.freeCells addObject:VDPositionToString(VDPositionMake(i, j))];
         }
         
         [self.rawData addObject:rowData];
@@ -104,7 +107,7 @@ NSUInteger const VDBoardSize = 4;
     {
         for (int j = 0; j < VDBoardSize; j++)
         {
-            NSInteger value = [self valueAtBoardCellRow:i column:j];
+            NSInteger value = [self valueAtPosition:VDPositionMake(i, j)];
             [boardData appendFormat:@"%lu;", (long)value];
         }
     }
@@ -113,29 +116,10 @@ NSUInteger const VDBoardSize = 4;
 
 #pragma mark - Utils
 
-+ (NSString *)encodeRow:(NSUInteger)row column:(NSUInteger)column
-{
-    return [NSString stringWithFormat:@"%lu.%lu", (unsigned long)row, (unsigned long)column];
-}
-
-+ (void)decodeString:(NSString *)str row:(NSUInteger *)row column:(NSUInteger *)column
-{
-    float floatVal = [str floatValue];
-    NSInteger intVal = [str integerValue];
-    if (row != NULL)
-    {
-        *row = intVal;
-    }
-    if (column != NULL)
-    {
-        *column = roundf((floatVal - intVal) * 10);
-    }
-}
-
-+ (NSString *)randomCellFromArray:(NSArray *)cells
++ (VDPosition)randomCellFromArray:(NSArray *)cells
 {
     NSUInteger randIndex = [self randomValueBetweenMin:0 max:cells.count - 1];
-    return cells[randIndex];
+    return VDPositionFromString(cells[randIndex]);
 }
 
 + (NSUInteger)randomValueBetweenMin:(NSUInteger)min max:(NSUInteger)max

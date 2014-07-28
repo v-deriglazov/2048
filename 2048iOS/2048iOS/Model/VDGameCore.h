@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "VDPosition.h"
+
 typedef enum
 {
     VDMoveDirectionNone = 0,
@@ -26,10 +28,15 @@ typedef enum
 //- (id)initWithDocument:(VDDocument *)document;
 - (NSUInteger)numberOfRows;
 - (NSUInteger)numberOfColumns;
-- (NSUInteger)valueAtRow:(NSUInteger)row column:(NSUInteger)column;
+- (NSUInteger)valueAtPosition:(VDPosition)position;
 - (NSUInteger)score;
+@property (nonatomic, readonly) NSUInteger bestScore;
+
+@property (nonatomic, readonly) CGFloat time;
+- (void)startGame;
+- (void)pauseGame;
 
 - (BOOL)canMoveToDirection:(VDMoveDirection)direction;
-- (BOOL)moveToDirection:(VDMoveDirection)direction movedCells:(NSDictionary **)movedCells mergedCells:(NSDictionary **)mergedCells newValue:(NSString **)newValuePath; //if return no - gameOver
+- (BOOL)moveToDirection:(VDMoveDirection)direction movedCells:(NSDictionary **)movedCells mergedCells:(NSDictionary **)mergedCells newValue:(VDPosition *)newValuePosition; //if return no - gameOver
 
 @end

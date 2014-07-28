@@ -10,12 +10,17 @@
 
 #import "VDGameData.h"
 
+static CGFloat const kVDGameCoreTimerUpdateInterval = 1.0f;
 
 @interface VDGameCore ()
 
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, strong) NSManagedObjectModel *managedObjectModel;
 @property (nonatomic, strong) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+@property (nonatomic, strong) NSTimer *timer;
+
+- (NSUInteger)valueAtRow:(NSUInteger)row column:(NSUInteger)column;
 
 @end
 
@@ -62,6 +67,13 @@
     return self;
 }
 
+- (void)dealloc
+{
+    [self.timer invalidate];
+}
+
+#pragma mark -
+
 - (NSUInteger)numberOfRows
 {
     return VDBoardSize;
@@ -74,12 +86,54 @@
 
 - (NSUInteger)valueAtRow:(NSUInteger)row column:(NSUInteger)column
 {
-    return [self.data valueAtBoardCellRow:row column:column];
+    return [self valueAtPosition:VDPositionMake(row, column)];
+}
+
+- (NSUInteger)valueAtPosition:(VDPosition)position
+{
+    return [self.data valueAtPosition:position];
 }
 
 - (NSUInteger)score
 {
     return [self.data.score integerValue];
+}
+
+- (NSUInteger)bestScore
+{
+    return [[NSUserDefaults standardUserDefaults] integerForKey:@"bestScore"];
+}
+
+- (void)setBestScore:(NSUInteger)bestScore
+{
+    [[NSUserDefaults standardUserDefaults] setInteger:bestScore forKey:@"bestScore"];
+    //nsnotification??
+}
+
+#pragma mark - Time
+
+- (CGFloat)time
+{
+    return [self.data.time floatValue];
+}
+
+- (void)startGame
+{
+    if (self.timer == nil)
+    {
+        self.timer = [NSTimer scheduledTimerWithTimeInterval:kVDGameCoreTimerUpdateInterval target:self selector:@selector(updateTime) userInfo:nil repeats:YES];
+    }
+}
+
+- (void)pauseGame
+{
+    [self.timer invalidate];
+    self.timer = nil;
+}
+
+- (void)updateTime
+{
+    self.data.time = [NSNumber numberWithFloat:self.time + kVDGameCoreTimerUpdateInterval];
 }
 
 #pragma mark - Move
@@ -201,7 +255,7 @@
 }
 
 
-- (BOOL)moveToDirection:(VDMoveDirection)direction movedCells:(NSDictionary **)movedCells mergedCells:(NSDictionary **)mergedCells newValue:(NSString **)newValuePath //if return no - gameOver
+- (BOOL)moveToDirection:(VDMoveDirection)direction movedCells:(NSDictionary **)movedCells mergedCells:(NSDictionary **)mergedCells newValue:(VDPosition *)newValuePosition //if return no - gameOver
 {
     NSDictionary *movedDictionary = nil;
     switch (direction)
@@ -233,10 +287,15 @@
         *movedCells = movedDictionary;
     }
     
-    NSString *newPath = [self.data addRandomValue];
-    if (newValuePath != NULL)
+    VDPosition newPosition = [self.data addRandomValue];
+    if (newValuePosition != NULL)
     {
-        *newValuePath = newPath;
+        *newValuePosition = newPosition;
+    }
+    
+    if (self.bestScore < self.score)
+    {
+        [self setBestScore:self.score];
     }
     
     BOOL result = [self canMoveToDirection:VDMoveDirectionLeft] || [self canMoveToDirection:VDMoveDirectionRight] || [self canMoveToDirection:VDMoveDirectionUp] || [self canMoveToDirection:VDMoveDirectionDown];
@@ -254,6 +313,7 @@
         NSMutableSet *mergedCols = [NSMutableSet new];
         for (NSUInteger col = 1; col < [self numberOfColumns]; col++)
         {
+            VDPosition position = VDPositionMake(row, col);
             NSUInteger value = [self valueAtRow:row column:col];
             if (value == 0)
             {
@@ -263,17 +323,19 @@
             NSUInteger colToMove = col;
             for (NSInteger curCol = col - 1; curCol >= 0; curCol--)
             {
+                VDPosition curPosition = VDPositionMake(row, curCol);
                 if (![mergedCols containsObject:@(curCol)] && [self valueAtRow:row column:curCol] == value)
                 {
-                    [self.data setValue:2 * value atBoardCellRow:row column:curCol];
-                    [self.data setValue:0 atBoardCellRow:row column:col];
+                    [self.data setValue:2 * value atPosition:curPosition];
+                    [self.data setValue:0 atPosition:position];
                     [mergedCols addObject:@(curCol)];
                     colToMove = col;
                     
-//                    NSLog(@"row = %lu, col = %lu merged with curCol = %lu value = %lu", row, col, curCol, 2*value);
+                    NSLog(@"pos = %@ merged with %@, value = %lu", VDPositionToString(position), VDPositionToString(curPosition), (unsigned long)2*value);
                     
-                    result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:row column:curCol];
-                    mergedDictionary[[VDGameData encodeRow:row column:curCol]] = @(2 * value);
+                    NSString *curPositionStr = VDPositionToString(curPosition);
+                    result[VDPositionToString(position)] = curPositionStr;
+                    mergedDictionary[curPositionStr] = @(2 * value);
                     
                     break;
                 }
@@ -288,11 +350,12 @@
             }
             if (colToMove != col)
             {
-//                NSLog(@"row = %lu, col = %lu move to coltomove = %lu", row, col, colToMove);
-                [self.data setValue:value atBoardCellRow:row column:colToMove];
-                [self.data setValue:0 atBoardCellRow:row column:col];
+                VDPosition positionToMove = VDPositionMake(row, colToMove);
+                NSLog(@"pos = %@ move to = %@", VDPositionToString(position), VDPositionToString(positionToMove));
+                [self.data setValue:value atPosition:positionToMove];
+                [self.data setValue:0 atPosition:position];
                 
-                result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:row column:colToMove];
+                result[VDPositionToString(position)] = VDPositionToString(positionToMove);
             }
         }
     }
@@ -316,6 +379,7 @@
         NSMutableSet *mergedCols = [NSMutableSet new];
         for (NSInteger col = [self numberOfColumns] - 2; col >= 0; col--)
         {
+            VDPosition position = VDPositionMake(row, col);
             NSUInteger value = [self valueAtRow:row column:col];
             if (value == 0)
             {
@@ -325,18 +389,19 @@
             NSUInteger colToMove = col;
             for (NSInteger curCol = col + 1; curCol < [self numberOfColumns]; curCol++)
             {
+                VDPosition curPosition = VDPositionMake(row, curCol);
                 NSUInteger curValue = [self valueAtRow:row column:curCol];
                 if (![mergedCols containsObject:@(curCol)] && curValue == value)
                 {
-                    [self.data setValue:2 * value atBoardCellRow:row column:curCol];
-                    [self.data setValue:0 atBoardCellRow:row column:col];
+                    [self.data setValue:2 * value atPosition:curPosition];
+                    [self.data setValue:0 atPosition:position];
                     [mergedCols addObject:@(curCol)];
                     colToMove = col;
                     
-//                    NSLog(@"row = %lu, col = %lu merged with curCol = %lu value = %lu", row, col, curCol, 2*value);
+                    NSLog(@"pos = %@ merged with %@, value = %lu", VDPositionToString(position), VDPositionToString(curPosition), (unsigned long)2*value);
                     
-                    result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:row column:curCol];
-                    mergedDictionary[[VDGameData encodeRow:row column:curCol]] = @(2 * value);
+                    result[VDPositionToString(position)] = VDPositionToString(curPosition);
+                    mergedDictionary[VDPositionToString(curPosition)] = @(2 * value);
                     
                     break;
                 }
@@ -351,12 +416,13 @@
             }
             if (colToMove != col)
             {
-//                NSLog(@"row = %lu, col = %lu move to coltomove = %lu", row, col, colToMove);
+                VDPosition positionToMove = VDPositionMake(row, colToMove);
+                NSLog(@"pos = %@ move to = %@", VDPositionToString(position), VDPositionToString(positionToMove));
                 
-                [self.data setValue:value atBoardCellRow:row column:colToMove];
-                [self.data setValue:0 atBoardCellRow:row column:col];
+                [self.data setValue:value atPosition:positionToMove];
+                [self.data setValue:0 atPosition:position];
                 
-                result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:row column:colToMove];
+                result[VDPositionToString(position)] = VDPositionToString(positionToMove);
             }
         }
     }
@@ -380,6 +446,7 @@
         NSMutableSet *mergedRows = [NSMutableSet new];
         for (NSUInteger row = 1; row < [self numberOfRows]; row++)
         {
+            VDPosition position = VDPositionMake(row, col);
             NSUInteger value = [self valueAtRow:row column:col];
             if (value == 0)
             {
@@ -389,18 +456,19 @@
             NSUInteger rowToMove = row;
             for (NSInteger curRow = row - 1; curRow >= 0; curRow--)
             {
+                VDPosition curPosition = VDPositionMake(curRow, col);
                 NSUInteger curValue = [self valueAtRow:curRow column:col];
                 if (![mergedRows containsObject:@(curRow)] && curValue == value)
                 {
-                    [self.data setValue:2 * value atBoardCellRow:curRow column:col];
-                    [self.data setValue:0 atBoardCellRow:row column:col];
+                    [self.data setValue:2 * value atPosition:curPosition];
+                    [self.data setValue:0 atPosition:position];
                     [mergedRows addObject:@(curRow)];
                     rowToMove = row;
                     
-//                    NSLog(@"row = %lu, col = %lu merged with curRow = %lu value = %lu", row, col, curRow, 2*value);
+                    NSLog(@"pos = %@ merged with %@, value = %lu", VDPositionToString(position), VDPositionToString(curPosition), (unsigned long)2*value);
                     
-                    result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:curRow column:col];
-                    mergedDictionary[[VDGameData encodeRow:curRow column:col]] = @(2 * value);
+                    result[VDPositionToString(position)] = VDPositionToString(curPosition);
+                    mergedDictionary[VDPositionToString(curPosition)] = @(2 * value);
                     
                     break;
                 }
@@ -415,12 +483,13 @@
             }
             if (rowToMove != row)
             {
-//                NSLog(@"row = %lu, col = %lu move to rowToMove = %lu", row, col, rowToMove);
+                VDPosition positionToMove = VDPositionMake(rowToMove, col);
+                NSLog(@"pos = %@ move to = %@", VDPositionToString(position), VDPositionToString(positionToMove));
                 
-                [self.data setValue:value atBoardCellRow:rowToMove column:col];
-                [self.data setValue:0 atBoardCellRow:row column:col];
+                [self.data setValue:value atPosition:positionToMove];
+                [self.data setValue:0 atPosition:position];
                 
-                result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:rowToMove column:col];
+                result[VDPositionToString(position)] = VDPositionToString(positionToMove);
             }
         }
     }
@@ -445,6 +514,7 @@
         NSMutableSet *mergedRows = [NSMutableSet new];
         for (NSInteger row = [self numberOfRows] - 2; row >= 0; row--)
         {
+            VDPosition position = VDPositionMake(row, col);
             NSUInteger value = [self valueAtRow:row column:col];
             if (value == 0)
             {
@@ -454,18 +524,19 @@
             NSUInteger rowToMove = row;
             for (NSInteger curRow = row + 1; curRow < [self numberOfRows]; curRow++)
             {
+                VDPosition curPosition = VDPositionMake(curRow, col);
                 NSUInteger curValue = [self valueAtRow:curRow column:col];
                 if (![mergedRows containsObject:@(curRow)] && curValue == value)
                 {
-                    [self.data setValue:2 * value atBoardCellRow:curRow column:col];
-                    [self.data setValue:0 atBoardCellRow:row column:col];
+                    [self.data setValue:2 * value atPosition:curPosition];
+                    [self.data setValue:0 atPosition:position];
                     [mergedRows addObject:@(curRow)];
                     rowToMove = row;
                     
-//                    NSLog(@"row = %lu, col = %lu merged with curRow = %lu value = %lu", row, col, curRow, 2*value);
+                    NSLog(@"pos = %@ merged with %@, value = %lu", VDPositionToString(position), VDPositionToString(curPosition), (unsigned long)2*value);
                     
-                    result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:curRow column:col];
-                    mergedDictionary[[VDGameData encodeRow:curRow column:col]] = @(2 * value);
+                    result[VDPositionToString(position)] = VDPositionToString(curPosition);
+                    mergedDictionary[VDPositionToString(curPosition)] = @(2 * value);
                     
                     break;
                 }
@@ -480,12 +551,13 @@
             }
             if (rowToMove != row)
             {
-//                NSLog(@"row = %lu, col = %lu move to rowToMove = %lu", row, col, rowToMove);
+                VDPosition positionToMove = VDPositionMake(rowToMove, col);
+                NSLog(@"pos = %@ move to = %@", VDPositionToString(position), VDPositionToString(positionToMove));
                 
-                [self.data setValue:value atBoardCellRow:rowToMove column:col];
-                [self.data setValue:0 atBoardCellRow:row column:col];
+                [self.data setValue:value atPosition:positionToMove];
+                [self.data setValue:0 atPosition:position];
                 
-                result[[VDGameData encodeRow:row column:col]] = [VDGameData encodeRow:rowToMove column:col];
+                result[VDPositionToString(position)] = VDPositionToString(positionToMove);
             }
         }
     }

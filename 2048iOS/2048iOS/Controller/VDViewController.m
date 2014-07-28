@@ -19,6 +19,10 @@ static NSString *const VDBoardCellReuseIdentifier = @"VDBoardCellReuseIdentifier
 
 @property (nonatomic, weak) IBOutlet UICollectionView *collectionView;
 
+@property (nonatomic, weak) IBOutlet UILabel *scoreLabel;
+@property (nonatomic, weak) IBOutlet UILabel *timeLabel;
+@property (nonatomic, weak) IBOutlet UILabel *topScoreLabel;
+
 @property (nonatomic, strong) VDGameCore *gameCore;
 
 - (IBAction)swipeGesture:(UISwipeGestureRecognizer *)recognizer;
@@ -56,12 +60,22 @@ static NSString *const VDBoardCellReuseIdentifier = @"VDBoardCellReuseIdentifier
     CGFloat itemWidth = floorf((CGRectGetWidth(bounds) - (numOfCols - 1) * layout.minimumInteritemSpacing) / numOfCols);
     CGFloat itemHeight = floorf((CGRectGetHeight(bounds) - (numOfRows - 1) * layout.minimumLineSpacing) / numOfRows);
     layout.itemSize = CGSizeMake(itemWidth, itemHeight);
+    [self updateLabels];
+    
+    [self.gameCore startGame];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)updateLabels
+{
+    self.scoreLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)self.gameCore.score];
+    self.topScoreLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)self.gameCore.bestScore];
+    self.timeLabel.text = [NSString stringWithFormat:@"%f", self.gameCore.time];
 }
 
 #pragma mark - 
@@ -86,8 +100,8 @@ static NSString *const VDBoardCellReuseIdentifier = @"VDBoardCellReuseIdentifier
     {
         NSDictionary *movedCells = nil;
         NSDictionary *mergedCells = nil;
-        NSString *newPath = nil;
-        [self.gameCore moveToDirection:moveDirection movedCells:&movedCells mergedCells:&mergedCells newValue:&newPath];
+        VDPosition newPosition;
+        [self.gameCore moveToDirection:moveDirection movedCells:&movedCells mergedCells:&mergedCells newValue:&newPosition];
 
         [self.collectionView reloadData];
         
@@ -98,7 +112,7 @@ static NSString *const VDBoardCellReuseIdentifier = @"VDBoardCellReuseIdentifier
             [indexPaths addObject:[self indexPathFromPositionStr:positionTo]];
         }];
         
-        NSMutableArray *mergedIndexPaths = [NSMutableArray arrayWithObject:[self indexPathFromPositionStr:newPath]];
+        NSMutableArray *mergedIndexPaths = [NSMutableArray arrayWithObject:[self indexPathFromPositionStr:VDPositionToString(newPosition)]];
         [mergedCells enumerateKeysAndObjectsUsingBlock:^(NSString *position, NSString *value, BOOL *stop)
          {
              [mergedIndexPaths addObject:[self indexPathFromPositionStr:position]];
@@ -115,6 +129,7 @@ static NSString *const VDBoardCellReuseIdentifier = @"VDBoardCellReuseIdentifier
                 [cell makeNewValueAnimation];
             }
         }];
+        [self updateLabels];
     }
 }
 
@@ -123,6 +138,13 @@ static NSString *const VDBoardCellReuseIdentifier = @"VDBoardCellReuseIdentifier
     VDPosition position = VDPositionFromString(posStr);
     NSIndexPath *result = [NSIndexPath indexPathForItem:position.row * [self.gameCore numberOfColumns] + position.column inSection:0];
     return result;
+}
+
+- (VDPosition)positionFromIndexPath:(NSIndexPath *)indexPath
+{
+    NSUInteger row = indexPath.item / [self.gameCore numberOfColumns];
+    NSUInteger col = indexPath.item  - row * [self.gameCore numberOfColumns];
+    return VDPositionMake(row, col);
 }
 
 #pragma mark - UICollectionViewDataSource
@@ -135,9 +157,8 @@ static NSString *const VDBoardCellReuseIdentifier = @"VDBoardCellReuseIdentifier
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     VDBoardCell *cell = (VDBoardCell *)[collectionView dequeueReusableCellWithReuseIdentifier:VDBoardCellReuseIdentifier forIndexPath:indexPath];
-    NSUInteger row = indexPath.item / [self.gameCore numberOfColumns];
-    NSUInteger col = indexPath.item  - row * [self.gameCore numberOfColumns];
-    cell.value = [self.gameCore valueAtRow:row column:col];
+    VDPosition position = [self positionFromIndexPath:indexPath];
+    cell.value = [self.gameCore valueAtPosition:position];
     return cell;
 }
 
